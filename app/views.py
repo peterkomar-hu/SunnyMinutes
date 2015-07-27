@@ -107,6 +107,24 @@ def zoom():
             append_buildings_in_block(con, x_id_list[i], y_id_list[i])\
         )
 
+    # create plot for building zoom
+    fig = plt.figure()
+    ax = fig.add_axes([0,0,1,1])
+    radius = ZOOM_SIZE/2 * 1.5
+    for key in buildings:
+        if obs.distance_from_building(buildings[key]) < radius:
+            buildings[key].plot_footprint(ax, color='k')
+    obs.plot_observers_location(ax)
+    L = ZOOM_SIZE/2     # half size of the plotted area in meters
+    ax.set_xlim([obs.x-L, obs.x+L])
+    ax.set_ylim([obs.y-L, obs.y+L])    
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)    
+    ax.set_aspect('equal')
+    fig.set_size_inches(5, 5)
+    plt.savefig('./static/building_zoom.png', bbox_inches='tight')
+    fig.clf()
+
     return render_template('zoom_to_address.html', 
         address_placeholder=address_placeholder)
 
@@ -121,6 +139,25 @@ def zoom_after_click():
     obs.convert_to_geographical()
 
     exec 'floor_placeholder = "'+ DEFAULT_FLOOR + '"' in globals()
+
+    # create plot for building zoom
+    fig = plt.figure()
+    ax = fig.add_axes([0,0,1,1])
+    radius = ZOOM_SIZE/2 * 1.5
+    for key in buildings:
+        if obs.distance_from_building(buildings[key]) < radius:
+            buildings[key].plot_footprint(ax, color='k')
+    obs.plot_observers_location(ax)
+    L = ZOOM_SIZE/2     # half size of the plotted area in meters
+    ax.set_xlim([obs.x-L, obs.x+L])
+    ax.set_ylim([obs.y-L, obs.y+L])    
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)    
+    ax.set_aspect('equal')
+    fig.set_size_inches(5, 5)
+    plt.savefig('./static/building_zoom.png', bbox_inches='tight')
+    fig.clf()
+
     return render_template('show_calculate_button.html', 
         address_placeholder=address_placeholder, 
         floor_placeholder=floor_placeholder)
@@ -145,83 +182,19 @@ def show_results():
     summary.clear()
     summary.collect_summary(sil, obs, SUN_STEPSIZE)
 
-    # sun.get_date(DEFAULT_DAY)
-    # sun.lat = obs.lat
-    # sun.lon = obs.lon
-
-    # sun.positions = []
-    # sun.calculate_path()
-
-    # sun.visible = []
-    # v = sun.calculate_visibility(sil)
-    # # message = str(v[0]) + ' min sunny / ' + str(v[1]) + ' min total'
-
-    return render_template("results.html", lat=obs.lat, lon=obs.lon, 
-        address_placeholder=address_placeholder, 
-        floor_placeholder=floor_placeholder)
-
-@app.route('/building_zoom')
-def draw_building_zoom():
-    fig = plt.figure()
-    ax = fig.add_axes([0,0,1,1])
-
-    radius = ZOOM_SIZE/2 * 1.5
-    for key in buildings:
-        if obs.distance_from_building(buildings[key]) < radius:
-            buildings[key].plot_footprint(ax, color='k')
-    obs.plot_observers_location(ax)
-
-    L = ZOOM_SIZE/2     # half size of the plotted area in meters
-    ax.set_xlim([obs.x-L, obs.x+L])
-    ax.set_ylim([obs.y-L, obs.y+L])    
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)    
-
-    ax.set_aspect('equal')
-    fig.set_size_inches(5, 5)
-
-    # post-process for html
-    canvas = FigureCanvas(fig)
-    png_output = StringIO.StringIO()
-    canvas.print_png(png_output)
-    response = make_response(png_output.getvalue())
-    response.headers['Content-Type'] = 'image/png'
-    
-    fig.clf()
-    return response 
-
-
-
-@app.route('/light_plot')
-def draw_light_plot():
+    # create light summary plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
     #ax = fig.add_axes([0,0,1,1])
-
     summary.plot_light(ax)
-
     fig.set_size_inches(8, 8)
-
-
-    # post-process for html
-    canvas = FigureCanvas(fig)
-    png_output = StringIO.StringIO()
-    canvas.print_png(png_output)
-    response = make_response(png_output.getvalue())
-    response.headers['Content-Type'] = 'image/png'
-        
+    plt.savefig('./static/light_plot.png', bbox_inches='tight')    
     fig.clf()
-    return response 
 
-
-@app.route('/inverted_polar_plot')
-def draw_inverted_polar_plot():
+    # create fisheye plot
     fig = plt.figure()
     ax = fig.add_axes([0,0,1,1])
-
     sil.draw_inverted_polar(ax, color='k')
-    
-
     this_year = dt.datetime.today().year
     dates_to_plot = [
         dt.datetime(this_year, 3, 20), 
@@ -236,19 +209,105 @@ def draw_inverted_polar_plot():
             date=d)
         sun.calculate_path()
         sun.calculate_visibility(sil)
-        sun.draw_inverted_polar(ax)
-    
+        sun.draw_inverted_polar(ax)  
     fig.set_size_inches(8, 8)
-
-    # post-process for html
-    canvas = FigureCanvas(fig)
-    png_output = StringIO.StringIO()
-    canvas.print_png(png_output)
-    response = make_response(png_output.getvalue())
-    response.headers['Content-Type'] = 'image/png'
-        
+    plt.savefig('./static/inverted_polar_plot.png', bbox_inches='tight')
     fig.clf()
-    return response 
+
+    return render_template("results.html", lat=obs.lat, lon=obs.lon, 
+        address_placeholder=address_placeholder, 
+        floor_placeholder=floor_placeholder)
+
+
+# @app.route('/building_zoom')
+# def draw_building_zoom():
+#     fig = plt.figure()
+#     ax = fig.add_axes([0,0,1,1])
+
+#     radius = ZOOM_SIZE/2 * 1.5
+#     for key in buildings:
+#         if obs.distance_from_building(buildings[key]) < radius:
+#             buildings[key].plot_footprint(ax, color='k')
+#     obs.plot_observers_location(ax)
+
+#     L = ZOOM_SIZE/2     # half size of the plotted area in meters
+#     ax.set_xlim([obs.x-L, obs.x+L])
+#     ax.set_ylim([obs.y-L, obs.y+L])    
+#     ax.xaxis.set_visible(False)
+#     ax.yaxis.set_visible(False)    
+
+#     ax.set_aspect('equal')
+#     fig.set_size_inches(5, 5)
+
+#     # post-process for html
+#     canvas = FigureCanvas(fig)
+#     png_output = StringIO.StringIO()
+#     canvas.print_png(png_output)
+#     response = make_response(png_output.getvalue())
+#     response.headers['Content-Type'] = 'image/png'
+
+#     fig.clf()
+#     return response 
+
+
+
+# @app.route('/light_plot')
+# def draw_light_plot():
+#     fig = plt.figure()
+#     ax = fig.add_subplot(111)
+#     #ax = fig.add_axes([0,0,1,1])
+
+#     summary.plot_light(ax)
+
+#     fig.set_size_inches(8, 8)
+
+
+#     # post-process for html
+#     canvas = FigureCanvas(fig)
+#     png_output = StringIO.StringIO()
+#     canvas.print_png(png_output)
+#     response = make_response(png_output.getvalue())
+#     response.headers['Content-Type'] = 'image/png'
+        
+#     fig.clf()
+#     return response 
+
+
+# @app.route('/inverted_polar_plot')
+# def draw_inverted_polar_plot():
+#     fig = plt.figure()
+#     ax = fig.add_axes([0,0,1,1])
+
+#     sil.draw_inverted_polar(ax, color='k')
+    
+
+#     this_year = dt.datetime.today().year
+#     dates_to_plot = [
+#         dt.datetime(this_year, 3, 20), 
+#         dt.datetime(this_year, 6, 21), 
+#         dt.datetime(this_year, 12, 22)
+#     ]
+#     for d in dates_to_plot:
+#         sun = SunPath(
+#             stepsize=SUN_STEPSIZE, 
+#             lat=obs.lat, 
+#             lon=obs.lon, 
+#             date=d)
+#         sun.calculate_path()
+#         sun.calculate_visibility(sil)
+#         sun.draw_inverted_polar(ax)
+    
+#     fig.set_size_inches(8, 8)
+
+#     # post-process for html
+#     canvas = FigureCanvas(fig)
+#     png_output = StringIO.StringIO()
+#     canvas.print_png(png_output)
+#     response = make_response(png_output.getvalue())
+#     response.headers['Content-Type'] = 'image/png'
+        
+#     fig.clf()
+#     return response 
 
 
 # @app.route('/block_map')
