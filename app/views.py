@@ -65,6 +65,7 @@ def add_header(response):
 
 
 @app.route('/')
+@app.route('/index')
 def start():
     exec 'address_placeholder = "e.g. One Times Square"' in globals()
 
@@ -149,7 +150,7 @@ def zoom_after_click():
     obs.y = obs.y + dy
     obs.convert_to_geographical()
 
-    exec 'floor_placeholder = "'+ DEFAULT_FLOOR + '"' in globals()
+    exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
     # create plot for building zoom
     fig = plt.figure()
@@ -177,9 +178,9 @@ def zoom_after_click():
 def show_results():
     floor = request.args.get('Floor')
 
-    if not obs.get_altitude(floor):
-        floor = DEFAULT_FLOOR
-    exec 'floor_placeholder = "' + str(int(floor)) + '"' in globals()
+    # if not obs.get_altitude(floor):
+    #     floor = DEFAULT_FLOOR
+    exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
 
     # add roofs of the buildigns to sil

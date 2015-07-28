@@ -198,12 +198,17 @@
   <div class="col-md-4 margin">
     <div id="content">
       <ul id="tabs" class="nav nav-tabs" data-tabs="tabs">
-        <li class="active"><a href="#summary_tab" data-toggle="tab">Summary</a></li>
+        <li class="active"><a href="#map_tab" data-toggle="tab">Map</a></li>
         <li><a href="#fisheye_tab" data-toggle="tab">Sky</a></li>
-        <li><a href="#map_tab" data-toggle="tab">Map</a></li>
+        <li><a href="#summary_tab" data-toggle="tab">Summary</a></li>
       </ul>
       <div id="my-tab-content" class="tab-content">
-        <div class="tab-pane active" id="summary_tab">
+        <div class="tab-pane active" id="map_tab">
+          <p>Map of the neighborhood</p>
+          <!-- <img src="./block_map" height="450"> -->
+            <div id="map" style="width: 500px; height: 500px;"></div> 
+        </div>
+        <div class="tab-pane" id="summary_tab">
           <p>Summary of the year</p>
           <img src="./static/light_plot.png" width="500">
         </div>
@@ -211,11 +216,6 @@
           <p>Fisheye view of the sky</p>
           <img src="./static/inverted_polar_plot.png" height="500">
       </div>
-        <div class="tab-pane active" id="map_tab">
-          <p>Map of the neighborhood</p>
-          <!-- <img src="./block_map" height="450"> -->
-            <div id="map" style="width: 500px; height: 500px;"></div> 
-        </div>
       </div> <!-- /tab-conent -->
     </div>  <!-- /content -->
   </div>  <!-- /col-md-4 -->
