@@ -42,6 +42,7 @@ obs = Observer()
 sil = Silhouette()
 summary = SunSummary()
 buildings = {}
+building_keys_at_address = []
 x_grid = None
 y_grid = None
 address_placeholder = 'e.g. One Times Square'
@@ -113,6 +114,10 @@ def zoom():
         (x_id_list, y_id_list) = obs.get_neighboring_block_ids()
         buildings.update(append_buildings_in_block(con, x_id_list[0], y_id_list[0]))
 
+    # find the building the observer is sitting in
+    del building_keys_at_address[:]
+    building_keys_at_address.extend(obs.get_my_buildings(buildings))
+
     # add buildings in neighboring blocks
     for i in range(1, len(x_id_list)):
         buildings.update(\
@@ -125,7 +130,10 @@ def zoom():
     radius = ZOOM_SIZE/2 * 1.5
     for key in buildings:
         if obs.distance_from_building(buildings[key]) < radius:
-            buildings[key].plot_footprint(ax, color='k')
+            if key not in building_keys_at_address:
+                buildings[key].plot_footprint(ax, color='k')
+            else:
+                buildings[key].plot_footprint(ax, color='r')
     obs.plot_observers_location(ax)
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([obs.x-L, obs.x+L])
@@ -152,13 +160,21 @@ def zoom_after_click():
 
     exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
+    # find the building the observer is sitting in
+    del building_keys_at_address[:]
+    building_keys_at_address.extend(obs.get_my_buildings(buildings))
+
+
     # create plot for building zoom
     fig = plt.figure()
     ax = fig.add_axes([0,0,1,1])
     radius = ZOOM_SIZE/2 * 1.5
     for key in buildings:
         if obs.distance_from_building(buildings[key]) < radius:
-            buildings[key].plot_footprint(ax, color='k')
+            if key not in building_keys_at_address:
+                buildings[key].plot_footprint(ax, color='k')
+            else:
+                buildings[key].plot_footprint(ax, color='r')
     obs.plot_observers_location(ax)
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([obs.x-L, obs.x+L])
@@ -186,7 +202,7 @@ def show_results():
     # add roofs of the buildigns to sil
     sil.cliffs = Silhouette().cliffs
     for key in buildings:
-        if buildings[key].z > obs.z:
+        if (buildings[key].z > obs.z) and (key not in building_keys_at_address):
             roofs = buildings[key].get_roofs(obs.x, obs.y, obs.z)
             for tup in roofs:
                 sil.add_roof( Roof(tup) )

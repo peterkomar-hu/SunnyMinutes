@@ -117,7 +117,7 @@ class Observer:
         my_building_keys = []
         for key in buildings:
             poly = []
-            for  node in buildings[key].nodes:
+            for  node in buildings[key].nodes[:-1]:     # buildings repeat the first node as last
                 poly.append((node.x, node.y))
             if self.is_inside(poly):
                 my_building_keys.append(key)
