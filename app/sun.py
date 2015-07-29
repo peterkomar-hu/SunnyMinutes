@@ -232,6 +232,8 @@ class SunSummary:
         self.afternoon_sun = [] # list of floats (minutes)
         self.sunrise = [] # list of booleans
         self.sunset = [] # list of booleans
+        self.wakinghours_sun = [] # list of floats (minutes)
+        self.middayhours_sun = [] # list of floats (minutes)
         
         # initialize weeks
         this_year = dt.datetime.today().year
@@ -248,6 +250,8 @@ class SunSummary:
         self.afternoon_sun = [] # list of floats (minutes)
         self.sunrise = [] # list of booleans
         self.sunset = [] # list of booleans
+        self.wakinghours_sun = [] # list of floats (minutes)
+        self.middayhours_sun = [] # list of floats (minutes)
         
         # initialize weeks
         this_year = dt.datetime.today().year
@@ -271,6 +275,13 @@ class SunSummary:
             sunset_limit_index = int(15 / this_sun.stepsize)
             self.sunrise.append(any(this_sun.visible[:sunset_limit_index]))
             self.sunset.append(any(this_sun.visible[-sunset_limit_index:]))
+            
+            six_am_index = total_steps/2 - 360/this_sun.stepsize
+            eight_am_index = total_steps/2 - 240/this_sun.stepsize
+            ten_am_index = total_steps/2 - 120/this_sun.stepsize
+            two_pm_index = total_steps/2 + 120/this_sun.stepsize
+            self.wakinghours_sun.append(sum(this_sun.visible[six_am_index:eight_am_index])  * this_sun.stepsize)
+            self.middayhours_sun.append(sum(this_sun.visible[ten_am_index:two_pm_index])  * this_sun.stepsize)
 
     def plot_light(self, ax):
         color_morning = '#ffc469'
@@ -306,17 +317,25 @@ class SunSummary:
             if d.month > current_month:
                 first_weeks.append(1 + i / 7.0)
                 current_month += 1
-            d += dt.timedelta(days=1)
+            d += one_day
             i += 1
 
         # plot vertical lines to divide months
         for i in first_weeks:
             ax.plot([i,i], [height_of_plot, -height_of_plot], color='k', linewidth=0.5)
 
+        # find the x position of the current date
+        today = dt.datetime.today()
+        year = today.year
+        todays_week = (today - dt.datetime(year,1,1)).days / 7.0 + 1
+
+        # plot vertical line to show current date
+        ax.plot([todays_week, todays_week], [height_of_plot, -height_of_plot], color='r', linewidth=1)
+
         month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         for i in range(0, 12, 1):
-            ax.text(first_weeks[i]+1.5, height_of_plot - 50, month_names[i])
-            ax.text(first_weeks[i]+1.5, -height_of_plot + 30, month_names[i])
+            ax.text(first_weeks[i]+1, height_of_plot - 50, month_names[i])
+            ax.text(first_weeks[i]+1, -height_of_plot + 30, month_names[i])
 
         # turn y labels into positive numbers
         y_ticks = range(-height_of_plot, +height_of_plot + dy_ticks, dy_ticks)
@@ -324,7 +343,7 @@ class SunSummary:
         plt.yticks(y_ticks, y_labels)
 
         ax.xaxis.set_visible(False)
-        ax.set_ylabel('minutes of morning/afternoon sun')
+        ax.set_ylabel('morning/afternoon sunlight [min]', fontsize=20)
         
 
 

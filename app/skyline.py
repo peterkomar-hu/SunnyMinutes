@@ -137,7 +137,7 @@ class Silhouette:
         
 
 
-    def draw_inverted_polar(self, ax, color='k', plot_size=2):
+    def draw_inverted_polar(self, ax, color='k', plot_size=1.85):
         gray_color = '#909090'
 
         # plot horizon
@@ -174,7 +174,7 @@ class Silhouette:
                     90+phi_deg[i+1]
                 ) \
             )
-        p = PatchCollection(wedge_list, facecolor='k', edgecolor=gray_color)
+        p = PatchCollection(wedge_list, facecolor=color, edgecolor=gray_color)
         ax.add_collection(p)
 
         # declare wedges, corresponding to the sky above each roof
@@ -188,7 +188,7 @@ class Silhouette:
                     90+phi_deg[i+1]
                 ) \
             )
-        p = PatchCollection(wedge_list, color='w')
+        p = PatchCollection(wedge_list, color='#edffff')
         ax.add_collection(p)
 
 
@@ -197,14 +197,28 @@ class Silhouette:
         # geographic directions and their names
         L = plot_size
         gray_color = '#909090'
+        fontsize = 'large'
+        outer_radius = np.pi/2 + 0.03
         ax.plot([0,0], [0.7*L,L], color=gray_color, zorder=10)
         ax.plot([0,0], [-0.7*L,-L], color=gray_color, zorder=10)
         ax.plot([-L,-0.7*L], [0,0], color=gray_color, zorder=10)
         ax.plot([L,0.7*L], [0,0], color=gray_color, zorder=10)
-        ax.text(0, -L, 'North', verticalalignment=u'bottom', horizontalalignment=u'center')
-        ax.text(0, L, 'South', verticalalignment=u'top', horizontalalignment=u'center')
-        ax.text(-L, 0, 'West', verticalalignment=u'bottom', horizontalalignment=u'left')
-        ax.text(L, 0, 'East', verticalalignment=u'bottom', horizontalalignment=u'right')
+        ax.text(0, -outer_radius, 'North', 
+            verticalalignment=u'top', 
+            horizontalalignment=u'center',
+            size=fontsize)
+        ax.text(0, outer_radius, 'South', 
+            verticalalignment=u'bottom', 
+            horizontalalignment=u'center',
+            size=fontsize)
+        ax.text(-outer_radius, 0, 'West', 
+            verticalalignment=u'bottom', 
+            horizontalalignment=u'right',
+            size=fontsize)
+        ax.text(outer_radius, 0, 'East', 
+            verticalalignment=u'bottom', 
+            horizontalalignment=u'left',
+            size=fontsize)
 
         # axes
         ax.set_ylim([-L, L])

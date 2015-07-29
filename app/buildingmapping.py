@@ -1,6 +1,10 @@
 # buildingmapping module
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 
 # class to store a single node of a building
 class Node:
@@ -42,13 +46,22 @@ class Building:
         print 'Height:\n' + 'z=' + str(self.z)
         
     def plot_footprint(self, ax, color='k'):
+        gray_color = '#909090'
+        
         x_list = []
         y_list = []
-        for node in self.nodes:
+        for node in self.nodes[:-1]:
             x_list.append(node.x)
             y_list.append(node.y)
-        ax.plot(x_list,y_list, color=color)
         
+        x_arr = np.array([x_list])
+        y_arr = np.array([y_list])
+
+        xy = np.concatenate((x_arr.T, y_arr.T), axis=1)
+        poly = Polygon(xy)
+        p = PatchCollection([poly], facecolor=color, edgecolor=gray_color)
+        ax.add_collection(p)
+
     def calculate_center(self):
         x_array = []
         y_array = []

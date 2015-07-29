@@ -28,7 +28,9 @@ from skyline import *
 from sun import *
 from observer import *
 
-
+# colors
+COLOR_BROWN = '#2d1b00'
+COLOR_LIGHTBROWN = '#ffc469'
 
 DEFAULT_DAY = '7/31'
 DEFAULT_ADDRESS = 'Columbus Circle'
@@ -133,7 +135,7 @@ def zoom():
             if key not in building_keys_at_address:
                 buildings[key].plot_footprint(ax, color='k')
             else:
-                buildings[key].plot_footprint(ax, color='r')
+                buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
     obs.plot_observers_location(ax)
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([obs.x-L, obs.x+L])
@@ -174,7 +176,7 @@ def zoom_after_click():
             if key not in building_keys_at_address:
                 buildings[key].plot_footprint(ax, color='k')
             else:
-                buildings[key].plot_footprint(ax, color='r')
+                buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
     obs.plot_observers_location(ax)
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([obs.x-L, obs.x+L])
@@ -194,8 +196,8 @@ def zoom_after_click():
 def show_results():
     floor = request.args.get('Floor')
 
-    # if not obs.get_altitude(floor):
-    #     floor = DEFAULT_FLOOR
+    if not obs.get_altitude(floor):
+        floor = DEFAULT_FLOOR
     exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
 
@@ -210,6 +212,21 @@ def show_results():
     summary.clear()
     summary.collect_summary(sil, obs, SUN_STEPSIZE)
 
+    # calculate sun score
+    minutes_in_2h = 2*60
+    minutes_in_12h = 12*60
+    minutes_of_total_visible_sun = sum(summary.morning_sun)
+    minutes_of_total_visible_sun += sum(summary.afternoon_sun)
+    minutes_of_total_visible_sun /= len(summary.dates)
+    minutes_of_waking_sun = sum(summary.wakinghours_sun)
+    minutes_of_waking_sun /= len(summary.dates)
+    wakeup_score = 100.0 * minutes_of_waking_sun / minutes_in_2h
+    day_score = 100.0 * minutes_of_total_visible_sun / minutes_in_12h
+    sun_score = 0.5 * wakeup_score + 0.5 * day_score
+    wakeup_score = round(wakeup_score, 1)
+    day_score = round(day_score, 1)
+    sun_score = round(sun_score, 1)
+    
     # create light summary plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -242,9 +259,34 @@ def show_results():
     plt.savefig('./static/inverted_polar_plot.png', bbox_inches='tight')
     fig.clf()
 
+    # compile message
+
+    message1 = ''
+    if wakeup_score > 30:
+        message1 += 'High chance of waking up to morning light. Enjoy!'
+    elif wakeup_score > 10:
+        message1 += 'Some sunlight at wake-up time. OK.'
+    else:
+        message1 += 'No direct morning light around wake-up time. Use artifical light to stabilize your circadian rythm.'
+    
+    message2 = ''
+    if day_score > 80:
+        message2 += 'Lot of sunlight during the day. Enjoy!'
+    elif day_score > 50:
+        message2 += 'Some direct sunlight during the day. OK.'
+    elif day_score > 20:
+        message2 += 'Little direct sunlight during the day. Use artifical light to keep your spirit up.'
+    else: 
+        message2 += 'No direct sunlight. Use artifical light to keep your spirit up.'
+
     return render_template("results.html", lat=obs.lat, lon=obs.lon, 
         address_placeholder=address_placeholder, 
-        floor_placeholder=floor_placeholder)
+        floor_placeholder=floor_placeholder,
+        wakeup_score=wakeup_score,
+        day_score=day_score,
+        sun_score=sun_score,
+        message1=message1,
+        message2=message2)
 
 
 # @app.route('/building_zoom')

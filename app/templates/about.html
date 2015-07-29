@@ -163,38 +163,63 @@
           
           <div class="tab-pane active" id="summary_tab">
             <h3></h3>
-            <p>I created SunnyMinutes in July 2015 as a data science project during the first Healthcare Data Science program organized by Insight Data in Boston, MA.
+
+            <p>I created SunnyMinutes in July 2015 as a data science project during the first Healthcare Data Science Fellowship program organized by 
+            <a href="http://insightdatascience.com/">Insight Data Science</a> in Boston, MA.
             </p>
+
             <h3>Tools</h3>
             <p>
-            Processing: Python 2.7 <br>
-            Storage: mySQL, pysql <br>
-            Visualization: matplotlib <br>
-            Web layout: flask, Bootstrap <br>
+
+            Processing: 
+            <a href="https://www.python.org/download/releases/2.7/">Python 2.7</a>
+            <br>
+            Storage: 
+            <a href="http://dev.mysql.com/doc/refman/5.7/en/installing.html">mySQL</a>, 
+            <a href="http://pysql.sourceforge.net/">pysql</a> 
+            <br>
+            
+            Visualization: 
+            <a href="http://matplotlib.org/">matplotlib </a> <br>
+
+            Web layout: 
+            <a href="http://flask.pocoo.org/">Flask </a>, 
+            <a href="http://getbootstrap.com/">Bootstrap </a> 
+            <br>
             </p>
+
             <h3>Source</h3>
             <p>
-            The entire source code can be downloaded from GitHub.
+            The entire source code can be downloaded from 
+            <a href="https://github.com/peterkomar-hu/SunnyMinutes">GitHub</a>.
             </p>
           </div>
 
           <div class="tab-pane" id="data_tab">
             <h3> Buildings </h3> 
             <p> 
-            I obtained the geometries of the buildings of Manhattan from OpenStreetMap. Each building (or building part) is represented by an ordered list of nodes (latitude, longitude), and a single hight value.
+            I obtained the geometries of the buildings of Manhattan from 
+            <a href="https://www.openstreetmap.org/">OpenStreetMap</a>.
+            Each building (or building part) is represented by an ordered list of nodes (latitude, longitude), and a single hight value.
             </p>
             <br>
 
             <h3> Sun light </h3> 
             <p>
-            I implemented the astronomical equation to calculate the equatorial coordinates of the sun.
+            I implemented the 
+            <a href="https://en.wikipedia.org/wiki/Position_of_the_Sun">astronomical equation</a>
+            to calculate the equatorial coordinates of the sun.
             </p>
           </div>
+
+          
           
           <div class="tab-pane" id="methods_tab">
             <h3> Data aquisition </h3>
             <p>
-            I called OpenStreetMap's Overpass API with a bounding box containing Manhattan (whose coordinates I read off Google Maps) and filters for  "building", and "building:part" tags.
+            I called OpenStreetMap's 
+            <a href="http://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a>
+            with a bounding box containing Manhattan (whose coordinates I read off Google Maps) and filters for  "building", and "building:part" tags.
             </p>
             <p>
             I processed the XML file (size ~100MB) with regular expressions, and extraced the lists of nodes (lat, lon) and height values for each building. I converted the (lat, lon) coordinates to Cartesian coordinates using the assumption that Manhattan is small enough to be taken as flat.

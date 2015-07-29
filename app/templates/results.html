@@ -111,6 +111,7 @@
     #summary_tab { width: 550px;}
     #fisheye_tab { width: 550px;}
     #map_tab { width: 550px;}
+    #score_tab { width: 550px;}
 
     /* Input textboxes */
     .input-address { width: 245px;}
@@ -201,6 +202,7 @@
         <li class="active"><a href="#map_tab" data-toggle="tab">Map</a></li>
         <li><a href="#fisheye_tab" data-toggle="tab">Sky</a></li>
         <li><a href="#summary_tab" data-toggle="tab">Summary</a></li>
+        <li><a href="#score_tab" data-toggle="tab">Score</a></li>
       </ul>
       <div id="my-tab-content" class="tab-content">
         <div class="tab-pane active" id="map_tab">
@@ -215,7 +217,20 @@
         <div class="tab-pane" id="fisheye_tab">
           <p>Fisheye view of the sky</p>
           <img src="./static/inverted_polar_plot.png" height="500">
-      </div>
+        </div>
+        <div class="tab-pane" id="score_tab">
+          <p> Sunlight scores (on the scale of 0-100)</p>
+          <p> - Wake-up sun score (6-8am): {{wakeup_score}}</p>
+          <p> - Around-day sun score: {{day_score}}</p>
+          <br>
+          <p> Overall sun score:</p>
+          <h2>{{sun_score}}</h2>
+          <br>
+          <p> Comments:</p>
+          <p>{{message1}}</p>
+          <p>{{message2}}</p>
+          <!-- <img src="./static/inverted_polar_plot.png" height="500"> -->
+        </div>
       </div> <!-- /tab-conent -->
     </div>  <!-- /content -->
   </div>  <!-- /col-md-4 -->
@@ -239,7 +254,7 @@
        var address = '{{lat}}, {{lon}}';
 
        var map = new google.maps.Map(document.getElementById('map'), { 
-           mapTypeId: google.maps.MapTypeId.TERRAIN,
+           mapTypeId: google.maps.MapTypeId.HYBRID,
            zoom: 16
        });
 
