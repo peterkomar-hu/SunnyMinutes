@@ -1,16 +1,13 @@
-__author__ = 'Peter Komar'
 
 # modules for the web app
 from flask import Flask
 from flask import render_template, request, make_response
+from app import app
 import StringIO
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-
-app = Flask(__name__)
-
 
 # modules for the processing
 # import re
@@ -28,6 +25,7 @@ from skyline import *
 from sun import *
 from observer import *
 
+
 # colors
 COLOR_BROWN = '#2d1b00'
 COLOR_LIGHTBROWN = '#ffc469'
@@ -38,6 +36,7 @@ DEFAULT_FLOOR = '0'
 ZOOM_SIZE = 200
 ZOOM_SIZE_PX = 350
 SUN_STEPSIZE = 5
+
 
 #  declare global instances
 obs = Observer()
@@ -54,6 +53,7 @@ con = mdb.connect('localhost', 'root', '123', 'Manhattan_buildings')
 
 obs.load_basic_geography(con)
 (x_grid, y_grid) = load_grid_data(con)
+
 
 
 @app.after_request
@@ -86,6 +86,9 @@ def go_to_contact_page():
 
 @app.route('/zoom')
 def zoom():
+
+    con = mdb.connect('localhost', 'root', '123', 'Manhattan_buildings')
+
     address = request.args.get('Address')
     
     if address:
@@ -144,7 +147,7 @@ def zoom():
     ax.yaxis.set_visible(False)    
     ax.set_aspect('equal')
     fig.set_size_inches(5, 5)
-    plt.savefig('./static/building_zoom.png', bbox_inches='tight')
+    plt.savefig('./app/static/building_zoom.png', bbox_inches='tight')
     fig.clf()
 
     return render_template('zoom_to_address.html', 
@@ -185,7 +188,7 @@ def zoom_after_click():
     ax.yaxis.set_visible(False)    
     ax.set_aspect('equal')
     fig.set_size_inches(5, 5)
-    plt.savefig('./static/building_zoom.png', bbox_inches='tight')
+    plt.savefig('./app/static/building_zoom.png', bbox_inches='tight')
     fig.clf()
 
     return render_template('show_calculate_button.html', 
@@ -233,7 +236,7 @@ def show_results():
     #ax = fig.add_axes([0,0,1,1])
     summary.plot_light(ax)
     fig.set_size_inches(8, 8)
-    plt.savefig('./static/light_plot.png', bbox_inches='tight')    
+    plt.savefig('./app/static/light_plot.png', bbox_inches='tight')    
     fig.clf()
 
     # create fisheye plot
@@ -256,7 +259,7 @@ def show_results():
         sun.calculate_visibility(sil)
         sun.draw_inverted_polar(ax)  
     fig.set_size_inches(8, 8)
-    plt.savefig('./static/inverted_polar_plot.png', bbox_inches='tight')
+    plt.savefig('./app/static/inverted_polar_plot.png', bbox_inches='tight')
     fig.clf()
 
     # compile message
@@ -504,6 +507,5 @@ def show_results():
 
 #     return render_template("input.html")
     
-if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=5000, debug=True)
+
 
