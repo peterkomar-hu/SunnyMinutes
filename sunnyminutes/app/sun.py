@@ -145,7 +145,9 @@ class SunPath:
         solid_linewidth=6, 
         dashed_linewidth=1,
         morning_color='#ffc469',
-        afternoon_color='#f98536'):
+        afternoon_color='#f98536',
+        label='',
+        text_color='k'):
 
         path = self.positions
         vis = self.visible
@@ -207,7 +209,16 @@ class SunPath:
                 ax.plot(x_list, y_list, color=afternoon_color, linewidth=solid_linewidth)
             i += 1
 
-
+        # label
+        x_offset = 0.1
+        r = np.pi/2 - path[0][1]
+        x = -r * np.sin(path[0][0]) + x_offset
+        y = r * np.cos(path[0][0])
+        ax.text(x, y, label, 
+            verticalalignment=u'center', 
+            horizontalalignment=u'left',
+            size='large',
+            color=text_color)
 
         # # morning sun
         # for p in self.positions[0:L/2]:
@@ -343,7 +354,7 @@ class SunSummary:
         plt.yticks(y_ticks, y_labels)
 
         ax.xaxis.set_visible(False)
-        ax.set_ylabel('morning/afternoon sunlight [min]', fontsize=20)
+        ax.set_ylabel('morning & afternoon sunlight [min]', fontsize=20)
         
 
 

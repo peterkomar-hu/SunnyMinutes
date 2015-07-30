@@ -109,6 +109,21 @@ class Silhouette:
                 cliff1 = Cliff(roof.phi1, theta1, roof.theta)
                 self.cliffs.insert(insert_index_1, cliff1)
  
+    def calculate_sky_visibility(self):
+        deltaphi_list = []
+        theta_list = []
+
+        for i in range(0, len(self.cliffs)-1, 1):
+            deltaphi_list.append(self.cliffs[i+1].phi - self.cliffs[i].phi)
+            theta_list.append(self.cliffs[i].theta_R)
+
+        deltaphi_arr = np.array(deltaphi_list)
+        theta_arr = np.array(theta_list)
+
+        full_sky = 2*np.pi
+        covered_sky = sum(deltaphi_arr * np.sin(theta_arr))
+        visible_sky = (full_sky - covered_sky) / full_sky
+        return visible_sky
 
     def draw(self, ax, color='k'):
             
@@ -188,7 +203,7 @@ class Silhouette:
                     90+phi_deg[i+1]
                 ) \
             )
-        p = PatchCollection(wedge_list, color='#edffff')
+        p = PatchCollection(wedge_list, color='#bed6ff')
         ax.add_collection(p)
 
 

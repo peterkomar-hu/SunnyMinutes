@@ -8,6 +8,7 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib import pylab as plt
 
 # modules for the processing
 # import re
@@ -221,15 +222,26 @@ def show_results():
     minutes_of_total_visible_sun = sum(summary.morning_sun)
     minutes_of_total_visible_sun += sum(summary.afternoon_sun)
     minutes_of_total_visible_sun /= len(summary.dates)
-    minutes_of_waking_sun = sum(summary.wakinghours_sun)
-    minutes_of_waking_sun /= len(summary.dates)
-    wakeup_score = 100.0 * minutes_of_waking_sun / minutes_in_2h
-    day_score = 100.0 * minutes_of_total_visible_sun / minutes_in_12h
-    sun_score = 0.5 * wakeup_score + 0.5 * day_score
-    wakeup_score = round(wakeup_score, 1)
+    #minutes_of_waking_sun = sum(summary.wakinghours_sun)
+    #minutes_of_waking_sun /= len(summary.dates)
+    #wakeup_score = 100.0 * minutes_of_waking_sun / minutes_in_2h
+    day_score = 5.0 * minutes_of_total_visible_sun / minutes_in_12h
+    #sun_score = 0.5 * wakeup_score + 0.5 * day_score
+    #wakeup_score = round(wakeup_score, 1)
     day_score = round(day_score, 1)
-    sun_score = round(sun_score, 1)
+    sun_score = day_score
+    #sun_score = round(sun_score, 1)
+    sun_icon_file = './static/' + str(round(2 * sun_score, 0) * 0.5) + '_sun.svg'
+
+
     
+    # calculate sky score
+    sky_visibility = sil.calculate_sky_visibility()
+    sky_score = 5.0 * sky_visibility
+    sky_score = round(sky_score, 1)
+    sky_icon_file = './static/' + str(round(2 * sky_score, 0) * 0.5) + '_sky.svg'
+
+
     # # create light summary plot
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
@@ -264,36 +276,39 @@ def show_results():
 
     # compile message
 
-    message1 = ''
-    if wakeup_score > 30:
-        message1 += 'High chance of waking up to morning light. Enjoy!'
-    elif wakeup_score > 10:
-        message1 += 'Some sunlight at wake-up time. OK.'
-    else:
-        message1 += 'No direct morning light around wake-up time. Use artifical light to stabilize your circadian rythm.'
+    # message1 = ''
+    # if wakeup_score > 30:
+    #     message1 += 'High chance of waking up to morning light. Enjoy!'
+    # elif wakeup_score > 10:
+    #     message1 += 'Some sunlight at wake-up time. OK.'
+    # else:
+    #     message1 += 'No direct morning light around wake-up time. Use artifical light to stabilize your circadian rythm.'
     
-    message2 = ''
-    if day_score > 80:
-        message2 += 'Lot of sunlight during the day. Enjoy!'
-    elif day_score > 50:
-        message2 += 'Some direct sunlight during the day. OK.'
-    elif day_score > 20:
-        message2 += 'Little direct sunlight during the day. Use artifical light to keep your spirit up.'
-    else: 
-        message2 += 'No direct sunlight. Use artifical light to keep your spirit up.'
+    # message2 = ''
+    # if day_score > 80:
+    #     message2 += 'Lot of sunlight during the day. Enjoy!'
+    # elif day_score > 50:
+    #     message2 += 'Some direct sunlight during the day. OK.'
+    # elif day_score > 20:
+    #     message2 += 'Little direct sunlight during the day. Use artifical light to keep your spirit up.'
+    # else: 
+    #     message2 += 'No direct sunlight. Use artifical light to keep your spirit up.'
 
     return render_template("results.html", lat=obs.lat, lon=obs.lon, 
         address_placeholder=address_placeholder, 
         floor_placeholder=floor_placeholder,
-        wakeup_score=wakeup_score,
-        day_score=day_score,
         sun_score=sun_score,
-        message1=message1,
-        message2=message2)
+        sky_score=sky_score,
+        sun_icon_file=sun_icon_file,
+        sky_icon_file=sky_icon_file)
 
 
 @app.route('/building_zoom')
 def draw_building_zoom():
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
+
     fig = plt.figure()
     ax = fig.add_axes([0,0,1,1])
     radius = ZOOM_SIZE/2 * 1.5
@@ -303,13 +318,16 @@ def draw_building_zoom():
                 buildings[key].plot_footprint(ax, color='k')
             else:
                 buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
-    obs.plot_observers_location(ax)
+    obs.plot_observers_location(ax, color='r')
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([obs.x-L, obs.x+L])
     ax.set_ylim([obs.y-L, obs.y+L])    
     ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)    
+    ax.yaxis.set_visible(False)
+    ax.axis('off')
     ax.set_aspect('equal')
+
+    fig.patch.set_facecolor('#d4c3a8')
     fig.set_size_inches(5, 5)
 
     # post-process for html
@@ -319,17 +337,24 @@ def draw_building_zoom():
     response = make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
 
-    fig.clf()
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
     return response 
 
 
 
 @app.route('/light_plot')
 def draw_light_plot():
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
+    
     # create light summary plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
     summary.plot_light(ax)
+    fig.patch.set_facecolor('#fff9f0')
     fig.set_size_inches(8, 8)
 
     # post-process for html
@@ -339,22 +364,37 @@ def draw_light_plot():
     response = make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
         
-    fig.clf()
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
     return response 
 
 
 @app.route('/inverted_polar_plot')
 def draw_inverted_polar_plot():
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
+
     fig = plt.figure()
     ax = fig.add_axes([0,0,1,1])
     sil.draw_inverted_polar(ax, color='k')
     this_year = dt.datetime.today().year
     dates_to_plot = [
-        dt.datetime(this_year, 3, 20), 
         dt.datetime(this_year, 6, 21), 
+        dt.datetime.today(),
         dt.datetime(this_year, 12, 22)
     ]
-    for d in dates_to_plot:
+    morning_colors = ['#ffc469', '#fd8181', '#ffc469']
+    afternoon_colors = ['#f98536', 'r', '#f98536']
+    labels = ['Jun 21', 'today', 'Dec 22']
+    text_colors = ['#f98536', 'r', '#f98536']
+    for i in range(0, len(dates_to_plot)):
+        d = dates_to_plot[i]
+        cm = morning_colors[i]
+        ca = afternoon_colors[i]
+        ct = text_colors[i]
+        l = labels[i]
         sun = SunPath(
             stepsize=SUN_STEPSIZE, 
             lat=obs.lat, 
@@ -362,7 +402,11 @@ def draw_inverted_polar_plot():
             date=d)
         sun.calculate_path()
         sun.calculate_visibility(sil)
-        sun.draw_inverted_polar(ax)  
+        sun.draw_inverted_polar(ax, morning_color=cm, afternoon_color=ca, text_color=ct, label=l)  
+    
+    ax.axis('off')
+    ax.set_aspect('equal')
+    fig.patch.set_facecolor('#fff9f0')
     fig.set_size_inches(8, 8)
 
     # post-process for html
@@ -372,7 +416,9 @@ def draw_inverted_polar_plot():
     response = make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
         
-    fig.clf()
+    plt.cla()   # Clear axis
+    plt.clf()   # Clear figure
+    plt.close() # Close a figure window
     return response 
 
 

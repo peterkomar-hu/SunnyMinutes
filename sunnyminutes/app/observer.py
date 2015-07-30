@@ -173,7 +173,7 @@ class Observer:
         ax.plot([self.x], [self.y], color=color, marker='o', markersize=5)
 
         # cross
-        L = 50
+        L = 20
         ax.plot([self.x, self.x], [self.y - L, self.y + L], color=color)
         ax.plot([self.x - L, self.x + L], [self.y, self.y], color=color)
 
