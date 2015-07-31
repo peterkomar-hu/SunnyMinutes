@@ -120,36 +120,20 @@ def zoom():
         (x_id_list, y_id_list) = obs.get_neighboring_block_ids()
         buildings.update(append_buildings_in_block(con, x_id_list[0], y_id_list[0]))
 
-    # find the building the observer is sitting in
+    # find the buildings the observer is sitting in
     del building_keys_at_address[:]
     building_keys_at_address.extend(obs.get_my_buildings(buildings))
+
+    # find windows
+    obs.clear_windows()
+    for key in building_keys_at_address:
+        obs.get_windows(buildings[key])
 
     # add buildings in neighboring blocks
     for i in range(1, len(x_id_list)):
         buildings.update(\
             append_buildings_in_block(con, x_id_list[i], y_id_list[i])\
         )
-
-    # # create plot for building zoom
-    # fig = plt.figure()
-    # ax = fig.add_axes([0,0,1,1])
-    # radius = ZOOM_SIZE/2 * 1.5
-    # for key in buildings:
-    #     if obs.distance_from_building(buildings[key]) < radius:
-    #         if key not in building_keys_at_address:
-    #             buildings[key].plot_footprint(ax, color='k')
-    #         else:
-    #             buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
-    # obs.plot_observers_location(ax)
-    # L = ZOOM_SIZE/2     # half size of the plotted area in meters
-    # ax.set_xlim([obs.x-L, obs.x+L])
-    # ax.set_ylim([obs.y-L, obs.y+L])    
-    # ax.xaxis.set_visible(False)
-    # ax.yaxis.set_visible(False)    
-    # ax.set_aspect('equal')
-    # fig.set_size_inches(5, 5)
-    # plt.savefig('./app/static/building_zoom.png', bbox_inches='tight')
-    # fig.clf()
 
     return render_template('zoom_to_address.html', 
         address_placeholder=address_placeholder)
@@ -162,35 +146,19 @@ def zoom_after_click():
     dy = -(click_y / ZOOM_SIZE_PX - 0.5) * ZOOM_SIZE
     obs.x = obs.x + dx
     obs.y = obs.y + dy
+    obs.clear_windows()
     obs.convert_to_geographical()
 
     exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
-    # find the building the observer is sitting in
+    # find the buildings the observer is sitting in
     del building_keys_at_address[:]
     building_keys_at_address.extend(obs.get_my_buildings(buildings))
 
-
-    # # create plot for building zoom
-    # fig = plt.figure()
-    # ax = fig.add_axes([0,0,1,1])
-    # radius = ZOOM_SIZE/2 * 1.5
-    # for key in buildings:
-    #     if obs.distance_from_building(buildings[key]) < radius:
-    #         if key not in building_keys_at_address:
-    #             buildings[key].plot_footprint(ax, color='k')
-    #         else:
-    #             buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
-    # obs.plot_observers_location(ax)
-    # L = ZOOM_SIZE/2     # half size of the plotted area in meters
-    # ax.set_xlim([obs.x-L, obs.x+L])
-    # ax.set_ylim([obs.y-L, obs.y+L])    
-    # ax.xaxis.set_visible(False)
-    # ax.yaxis.set_visible(False)    
-    # ax.set_aspect('equal')
-    # fig.set_size_inches(5, 5)
-    # plt.savefig('./app/static/building_zoom.png', bbox_inches='tight')
-    # fig.clf()
+    # find windows
+    obs.clear_windows()
+    for key in building_keys_at_address:
+        obs.get_windows(buildings[key])
 
     return render_template('show_calculate_button.html', 
         address_placeholder=address_placeholder, 
@@ -204,12 +172,55 @@ def show_results():
         floor = DEFAULT_FLOOR
     exec 'floor_placeholder = "'+ str(int(round(obs.z / 3))) + '"' in globals()
 
-
-    # add roofs of the buildigns to sil
+    # clear skyline
     sil.cliffs = Silhouette().cliffs
+    
+    # add the roof blocking the view towards the back of the window
+    if obs.closest_window:
+        phi_window = obs.closest_window.phi
+        if phi_window < -np.pi/2:
+            sil.add_roof(
+                Roof((
+                    phi_window + np.pi/2, 
+                    phi_window - np.pi/2 + 2*np.pi, 
+                    np.pi/2
+                ))
+            )
+        elif phi_window > np.pi/2:
+            sil.add_roof(
+                Roof((
+                    phi_window + np.pi/2 -2*np.pi, 
+                    phi_window - np.pi/2, 
+                    np.pi/2
+                ))
+            )
+        else:
+            sil.add_roof(
+                Roof((
+                    -np.pi, 
+                    phi_window - np.pi/2, 
+                    np.pi/2
+                ))
+            )
+            sil.add_roof(
+                Roof((
+                    phi_window + np.pi/2, 
+                    np.pi, 
+                    np.pi/2
+                ))
+            )
+
+    # add roofs of the buildings to sil
     for key in buildings:
         if (buildings[key].z > obs.z) and (key not in building_keys_at_address):
-            roofs = buildings[key].get_roofs(obs.x, obs.y, obs.z)
+            if obs.windows:
+                x = obs.closest_window.x
+                y = obs.closest_window.y
+            else:
+                x = obs.x
+                y = obs.y
+            z = obs.z
+            roofs = buildings[key].get_roofs(x, y, z)
             for tup in roofs:
                 sil.add_roof( Roof(tup) )
     
@@ -232,67 +243,12 @@ def show_results():
     sun_score = day_score
     #sun_score = round(sun_score, 1)
     sun_icon_file = './static/' + str(round(2 * sun_score, 0) * 0.5) + '_sun.svg'
-
-
     
     # calculate sky score
     sky_visibility = sil.calculate_sky_visibility()
     sky_score = 5.0 * sky_visibility
     sky_score = round(sky_score, 1)
     sky_icon_file = './static/' + str(round(2 * sky_score, 0) * 0.5) + '_sky.svg'
-
-
-    # # create light summary plot
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    # #ax = fig.add_axes([0,0,1,1])
-    # summary.plot_light(ax)
-    # fig.set_size_inches(8, 8)
-    # plt.savefig('./app/static/light_plot.png', bbox_inches='tight')    
-    # fig.clf()
-
-    # create fisheye plot
-    # fig = plt.figure()
-    # ax = fig.add_axes([0,0,1,1])
-    # sil.draw_inverted_polar(ax, color='k')
-    # this_year = dt.datetime.today().year
-    # dates_to_plot = [
-    #     dt.datetime(this_year, 3, 20), 
-    #     dt.datetime(this_year, 6, 21), 
-    #     dt.datetime(this_year, 12, 22)
-    # ]
-    # for d in dates_to_plot:
-    #     sun = SunPath(
-    #         stepsize=SUN_STEPSIZE, 
-    #         lat=obs.lat, 
-    #         lon=obs.lon, 
-    #         date=d)
-    #     sun.calculate_path()
-    #     sun.calculate_visibility(sil)
-    #     sun.draw_inverted_polar(ax)  
-    # fig.set_size_inches(8, 8)
-    # plt.savefig('./app/static/inverted_polar_plot.png', bbox_inches='tight')
-    # fig.clf()
-
-    # compile message
-
-    # message1 = ''
-    # if wakeup_score > 30:
-    #     message1 += 'High chance of waking up to morning light. Enjoy!'
-    # elif wakeup_score > 10:
-    #     message1 += 'Some sunlight at wake-up time. OK.'
-    # else:
-    #     message1 += 'No direct morning light around wake-up time. Use artifical light to stabilize your circadian rythm.'
-    
-    # message2 = ''
-    # if day_score > 80:
-    #     message2 += 'Lot of sunlight during the day. Enjoy!'
-    # elif day_score > 50:
-    #     message2 += 'Some direct sunlight during the day. OK.'
-    # elif day_score > 20:
-    #     message2 += 'Little direct sunlight during the day. Use artifical light to keep your spirit up.'
-    # else: 
-    #     message2 += 'No direct sunlight. Use artifical light to keep your spirit up.'
 
     return render_template("results.html", lat=obs.lat, lon=obs.lon, 
         address_placeholder=address_placeholder, 
@@ -420,131 +376,5 @@ def draw_inverted_polar_plot():
     plt.clf()   # Clear figure
     plt.close() # Close a figure window
     return response 
-
-
-# @app.route('/block_map')
-# def draw_block():
-#     fig = plt.figure()
-#     # ax = fig.add_subplot(111)
-#     ax = fig.add_axes([0,0,1,1])
-#     for key in buildings:
-#         if buildings[key].z > obs.z:    # plot only if building is taller than observer
-#             if buildings[key].z < 20:
-#                 color = 'k'
-#             elif buildings[key].z < 50:
-#                 color = 'b'
-#             elif buildings[key].z < 100:
-#                 color = 'g'
-#             elif buildings[key].z < 200:
-#                 color = 'r'
-#             else:
-#                 color = 'y'
-            
-#             buildings[key].plot_footprint(ax, color='k') 
-
-#     obs.plot_observers_location(ax, color='k')
-    
-#     L = 500
-#     ax.set_xlim([obs.x-L, obs.x+L])
-#     ax.set_ylim([obs.y-L, obs.y+L])    
-#     ax.xaxis.set_visible(False)
-#     ax.yaxis.set_visible(False)    
-    
-#     ax.set_aspect('equal')
-#     fig.set_size_inches(8, 8)
-
-#     # post-process for html
-#     canvas = FigureCanvas(fig)
-#     png_output = StringIO.StringIO()
-#     canvas.print_png(png_output)
-#     response = make_response(png_output.getvalue())
-#     response.headers['Content-Type'] = 'image/png'
-#     return response 
-
-
-# @app.route('/silhouette')
-# def draw_silhouette():
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-
-#     sun.draw(ax)       
-#     sil.draw(ax)
-
-#     ax.set_ylim([0, 90])
-#     ax.set_xlim([-180, 180])
-
-#     ax.set_aspect('equal', adjustable='box')
-#     fig.set_size_inches(10, 2.5)
-
-#     # post-process for html
-#     canvas = FigureCanvas(fig)
-#     png_output = StringIO.StringIO()
-#     canvas.print_png(png_output)
-#     response = make_response(png_output.getvalue())
-#     response.headers['Content-Type'] = 'image/png'
-#     return response 
-
-
-
-
-
-
-
-# @app.route('/input')
-# def input():
-#     address = request.args.get('Address')
-#     floor = request.args.get('Floor')
-#     day_of_year = request.args.get('Day')
-    
-#     if address:
-#         address = address + ' New York City'
-#     else:
-#         address = 'Columbus Circle, New York City'
-
-#     obs.get_geocoordinates(address, floor)
-#     obs.convert_to_cartesian()
-#     obs.find_my_block(x_grid, y_grid)
-
-#     sun.get_date(day_of_year)
-#     sun.lat = obs.lat
-#     sun.lon = obs.lon
-
-#     # get all buildings within the 9 blocks around the observer
-#     buildings.clear()
-#     (x_id_list, y_id_list) = obs.get_neighboring_block_ids()
-    
-#     # # add buildings on the block
-#     # buildings.update(append_buildings_in_block(con, x_id_list[0], y_id_list[0]))
-
-#     # # select the buildings the observer is sitting in, and delete them
-#     # building_at_address_keys = obs.get_my_buildings(buildings)
-#     # if building_at_address_keys:
-#     #     for key in building_at_address_keys:
-#     #         del buildings[key]
-
-#     # add buildings in neighboring blocks
-#     for i in range(0, len(x_id_list)):
-#         buildings.update(\
-#             append_buildings_in_block(con, x_id_list[i], y_id_list[i])\
-#         )
-
-
-#     # # add roofs of the buildigns to sil
-#     # sil.cliffs = Silhouette().cliffs
-#     # for key in buildings:
-#     #     if buildings[key].z > obs.z:
-#     #         roofs = buildings[key].get_roofs(obs.x, obs.y, obs.z)
-#     #         for tup in roofs:
-#     #             sil.add_roof( Roof(tup) )
-    
-#     # sun.positions = []
-#     # sun.calculate_path()
-
-#     # sun.visible = []
-#     # v = sun.calculate_visibility(sil)
-#     # # message = str(v[0]) + ' min sunny / ' + str(v[1]) + ' min total'
-
-#     return render_template("input.html")
-    
 
 

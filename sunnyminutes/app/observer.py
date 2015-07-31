@@ -3,13 +3,27 @@
 import re
 import numpy as np
 import datetime as dt
+import sympy.geometry as symg
 from dateutil.parser import parse
 import geocoder
+
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.patches import Wedge, Circle
+from matplotlib.collections import PatchCollection
 
 LATITUTE_DEFAULT = 40.7049687
 LONGITUDE_DEFAULT = -74.0145948
 ALTITUDE_DEFAULT = 0
     
+
+class Window:
+    def __init__(self, x=None, y=None, phi=None, distance=None):
+        self.x = x
+        self.y = y
+        self.phi = phi
+        self.distance = distance
+
 
 class Observer:
     def __init__(self, \
@@ -30,6 +44,8 @@ class Observer:
         self.z = alt
         self.block_xid = None
         self.block_yid = None
+        self.closest_window = None
+        self.windows = []
 
 
     def load_basic_geography(self, db_connection):
@@ -132,7 +148,6 @@ class Observer:
         return my_building_keys
 
 
-
     def is_inside(self, poly):
         x = self.x
         y = self.y
@@ -167,16 +182,114 @@ class Observer:
         
         return (xid_list, yid_list)
 
+    def clear_windows(self):
+        self.windows = []
+        self.closest_window = None
+
+    def get_windows(self, building):
+        p_obs = symg.Point(self.x, self.y)
+
+        # collect the segments of the building
+        sides = []
+        for i in range(0, len(building.nodes)-1):
+            node1 = building.nodes[i]
+            node2 = building.nodes[i+1]
+            p1 = symg.Point(node1.x, node1.y)
+            p2 = symg.Point(node2.x, node2.y)
+            sides.append(symg.Segment(p1, p2))
+
+        # collect windows that sit on the segments
+        for s in sides:
+            perp_line = s.perpendicular_line(p_obs)
+            p_list = symg.intersection(perp_line, s)
+            if p_list:
+                p_window = p_list[0]
+                phi = get_angle_from_south(p_obs, p_window)
+                distance = float(p_obs.distance(p_window))
+                w = Window(
+                    x=float(p_window.x), 
+                    y=float(p_window.y), 
+                    phi=phi, 
+                    distance=distance)
+                self.windows.append(w)
+
+        # find the closest window
+        self.closest_window = min(self.windows, key=lambda w: w.distance)
+
+
 
     def plot_observers_location(self, ax, color='k'):
         # center dot
         ax.plot([self.x], [self.y], color=color, marker='o', markersize=5)
 
-        # cross
-        L = 20
-        ax.plot([self.x, self.x], [self.y - L, self.y + L], color=color)
-        ax.plot([self.x - L, self.x + L], [self.y, self.y], color=color)
+        # cross at observers location
+        # L = 20
+        # ax.plot([self.x, self.x], [self.y - L, self.y + L], color=color)
+        # ax.plot([self.x - L, self.x + L], [self.y, self.y], color=color)
 
+        R = 10
+        W = 5
+        L = 20
+        if self.windows:
+            # arrow pointing to the closest window
+            w = self.closest_window
+            vx = w.x - self.x
+            vy = w.y - self.y
+            vnorm = np.sqrt(vx**2 + vy**2)
+            vx *= (float(L)/vnorm)
+            vy *= (float(L)/vnorm)
+            ax.arrow(self.x, self.y, vx, vy, 
+                head_width=5, head_length=10, fc=color, ec=color)
+
+            # dashed lines pointing to all windows
+            # for w in self.windows:
+            #     ax.plot([self.x, w.x], [self.y, w.y], color=color, linestyle='--')
+
+            # draw half circle around the observer, showing the field of view
+            
+            phi_window_deg = self.closest_window.phi * 180 / np.pi
+            wedge_list = []
+            wedge_list.append(
+                Wedge(
+                    (self.x, self.y), 
+                    R, 
+                    180 - phi_window_deg, 
+                    270 - phi_window_deg,
+                    width= W
+                ) 
+            )
+            wedge_list.append(
+                Wedge(
+                    (self.x, self.y), 
+                    R,
+                    270 - phi_window_deg, 
+                    360 - phi_window_deg,
+                    width=W
+                )
+            )
+            p = PatchCollection(wedge_list, color='#fd8181')
+            ax.add_collection(p)
+
+        else:
+            # draw full circle around the observer
+            wedge_list = []
+            wedge_list.append(
+                Wedge(
+                    (self.x, self.y), 
+                    R, 
+                    0, 
+                    360,
+                    width= W
+                ) 
+            )
+            p = PatchCollection(wedge_list, color='#fd8181')
+            ax.add_collection(p)
+
+
+def get_angle_from_south(p1, p2):
+    vx = float(p2.x - p1.x)
+    vy = float(p2.y - p1.y)
+    return np.arctan2(-vx, -vy) 
 
 def load_grid_data(db_connection):
     with db_connection:

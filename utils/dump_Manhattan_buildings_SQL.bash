@@ -1,0 +1,1 @@
+mysqldump -u root -p 123 Manhattan_buildings > ~/InsightDataFellowship/AWS/mirror_of_remote/sqldump/dump_Manhattan_buildings.sql
