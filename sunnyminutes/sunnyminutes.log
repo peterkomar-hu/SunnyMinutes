@@ -1,0 +1,14 @@
+2015-08-02 19:04:56.225510 -- Restarting flask server
+2015-08-02 19:04:56.692024 -- Restarting flask server
+2015-08-02 19:05:01.895588 -- Reactivating returning user: uid= 1, IP: 127.0.0.1
+2015-08-02 19:06:34.892663 -- Restarting flask server
+2015-08-02 19:06:37.077052 -- Reactivating returning user: uid= 1, IP: 127.0.0.1
+2015-08-02 19:06:37.077418 -- Users active: 1, total: 0
+2015-08-02 19:06:42.051981 -- Users active: 1, total: 0
+2015-08-02 19:06:43.783217 -- Users active: 1, total: 0
+2015-08-02 19:07:33.689443 -- Adding new user: uid= 0, IP: 127.0.0.1
+2015-08-02 19:07:33.689612 -- Users active: 2, total: 1
+2015-08-02 19:07:42.315015 -- Users active: 2, total: 1
+2015-08-02 19:07:51.026902 -- Adding new user: uid= 1, IP: 127.0.0.1
+2015-08-02 19:07:51.027183 -- Users active: 2, total: 2
+2015-08-02 19:08:10.032770 -- Users active: 2, total: 2

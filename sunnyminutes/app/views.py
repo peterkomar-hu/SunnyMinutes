@@ -32,12 +32,12 @@ ZOOM_SIZE = 200
 ZOOM_SIZE_PX = 350
 SUN_STEPSIZE = 5
 
-SESSION_LIFETIME_IN_SECONDS = 5 * 60
+SESSION_LIFETIME_IN_SECONDS = 2 * 60
 MAX_NUMBER_OF_ACTIVE_USERS = 100
 
 
 write_to_log('Restarting flask server')
-next_user_id = 0
+next_user_id = get_next_user_id()
 users = {}
 
 
@@ -59,25 +59,47 @@ def add_header(response):
 @app.route('/index')
 def start():
     # check existing users for activity, delete inactive users
+    inactive_users = []
     now = dt.datetime.today()
     for uid in users:
         if (now - users[uid].last_activity_time).seconds > SESSION_LIFETIME_IN_SECONDS:
-            write_to_log('Deleting inactive user: uid= ' + str(uid))
-            del users[uid]
-    write_to_log('Report: active users = ' + str(len(users)))
-    write_to_log('Report: total users = ' + str(next_user_id))
+            inactive_users.append(uid)
+    for uid in inactive_users:
+        write_to_log(
+            'Deactivating user: uid= ' + str(uid) 
+            )
+        del users[uid]
+
 
     if len(users) >= MAX_NUMBER_OF_ACTIVE_USERS:
         return redirect(url_for('about_page'))
 
-    # get the next available user id
-    uid = next_user_id
-    exec 'next_user_id += 1' in globals()
-    write_to_log('Adding new user: uid= ' + str(uid))
-    session['userid'] = uid
+    if 'userid' in session:
+        uid = session['userid']
+        if uid not in users:
+            write_to_log(
+                'Reactivating returning user: uid= ' + str(uid)
+                + ', IP: ' + str(request.remote_addr))
+    else:
+        uid = get_next_user_id()
+        exec 'next_user_id += 1' in globals()
+        put_next_user_id(next_user_id)
+        write_to_log(
+            'Adding new user: uid= ' + str(uid)
+            + ', IP: ' + str(request.remote_addr))
+        session['userid'] = uid
+
     
-    # create new user
     users[uid] = User()
+
+    
+
+    write_to_log(
+        'Users'
+        + ' active: ' + str(len(users))
+        + ', total: ' +  str(next_user_id))
+
+    
 
     return render_template('start.html', 
         address_placeholder=users[uid].address_placeholder)

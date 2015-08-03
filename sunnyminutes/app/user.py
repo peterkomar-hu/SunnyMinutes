@@ -27,4 +27,18 @@ def write_to_log(message):
     f.write(str(dt.datetime.today()) + ' -- ' + message + '\n')
     f.close()
 
-        
+
+def get_next_user_id():
+    f = open('users.stat', 'r')
+    match = re.search(r'total number of users = (\d+)', f.read())
+    if match:
+        next_user_id = int(match.group(1))
+    else:
+        next_user_id = 0
+    f.close()
+    return next_user_id
+
+def put_next_user_id(next_id):
+    f = open('users.stat', 'w')
+    f.write('total number of users = ' + str(next_id))
+    f.close()
