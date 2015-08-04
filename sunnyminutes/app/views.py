@@ -139,13 +139,18 @@ def zoom():
     address = request.args.get('Address')
     
     if address:
-        address = address + ', Manhattan'
+        latlonstyle_pat = r'\s*(\s*-?\s*?\d+\.?\d*\s*)\s*,\s*(\s*-?\s*?\d+\.?\d*)\s*'
+        match = re.search(latlonstyle_pat, address)
+        if match:
+            users[uid].obs.lat = float(match.group(1))
+            users[uid].obs.lon = float(match.group(2))
+        else:
+            address = address + ', Manhattan'
+            users[uid].obs.get_geocoordinates(address, floor=DEFAULT_FLOOR)
     else: 
         address = DEFAULT_ADDRESS
-
     users[uid].address_placeholder = address
-
-    users[uid].obs.get_geocoordinates(address, floor=DEFAULT_FLOOR)
+    
     users[uid].obs.convert_to_cartesian()
     users[uid].obs.find_my_block(users[uid].x_grid, users[uid].y_grid)
 
@@ -172,8 +177,9 @@ def zoom():
 
     # find windows
     users[uid].obs.clear_windows()
-    for key in users[uid].building_keys_at_address:
-        users[uid].obs.get_windows(users[uid].buildings[key])
+    if users[uid].get_number_of_floors() * 3 > users[uid].obs.z:
+        for key in users[uid].building_keys_at_address:
+            users[uid].obs.get_windows(users[uid].buildings[key])
 
     # add buildings in neighboring blocks
     for i in range(1, len(x_id_list)):
@@ -210,8 +216,9 @@ def zoom_after_click():
 
     # find windows
     users[uid].obs.clear_windows()
-    for key in users[uid].building_keys_at_address:
-        users[uid].obs.get_windows(users[uid].buildings[key])
+    if users[uid].get_number_of_floors() * 3 > users[uid].obs.z:
+        for key in users[uid].building_keys_at_address:
+            users[uid].obs.get_windows(users[uid].buildings[key])
 
     return render_template('show_calculate_button.html', 
         address_placeholder=users[uid].address_placeholder, 
@@ -232,6 +239,12 @@ def show_results():
     if not users[uid].obs.get_altitude(floor):
         floor = DEFAULT_FLOOR
     users[uid].floor_placeholder = str(int(round(users[uid].obs.z / 3)))
+
+    # find windows
+    users[uid].obs.clear_windows()
+    if users[uid].get_number_of_floors() * 3 > users[uid].obs.z:
+        for key in users[uid].building_keys_at_address:
+            users[uid].obs.get_windows(users[uid].buildings[key])
 
     # clear skyline
     users[uid].sil.cliffs = Silhouette().cliffs
@@ -365,6 +378,7 @@ def draw_building_zoom():
             else:
                 users[uid].buildings[key].plot_footprint(ax, color=COLOR_LIGHTBROWN)
     users[uid].obs.plot_observers_location(ax, color='r')
+    
     L = ZOOM_SIZE/2     # half size of the plotted area in meters
     ax.set_xlim([users[uid].obs.x-L, users[uid].obs.x+L])
     ax.set_ylim([users[uid].obs.y-L, users[uid].obs.y+L])    
@@ -372,6 +386,13 @@ def draw_building_zoom():
     ax.yaxis.set_visible(False)
     ax.axis('off')
     ax.set_aspect('equal')
+
+    number_of_floors = users[uid].get_number_of_floors()
+    ax.text(users[uid].obs.x, users[uid].obs.y + L/5, 'floors: ' + str(number_of_floors), 
+            verticalalignment=u'center', 
+            horizontalalignment=u'center',
+            size='large',
+            color='r')
 
     fig.patch.set_facecolor('#d4c3a8')
     fig.set_size_inches(5, 5)

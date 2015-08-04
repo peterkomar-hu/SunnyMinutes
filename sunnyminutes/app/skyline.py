@@ -159,6 +159,10 @@ class Silhouette:
         p = PatchCollection([Circle((0,0), np.pi/2+0.02)], color=gray_color)
         ax.add_collection(p)
 
+        # plot sky
+        p = PatchCollection([Circle((0,0), np.pi/2)], color='#bed6ff')
+        ax.add_collection(p)
+
         # get (phi, theta) coordinates from cliffs
         phis = []
         thetas = []
@@ -182,29 +186,30 @@ class Silhouette:
         wedge_list = []
         for i in range(0, len(phi_deg)-1):
             wedge_list.append(
-                Wedge(\
-                    (0,0), \
-                    np.pi/2, \
-                    90+phi_deg[i], \
-                    90+phi_deg[i+1]
-                ) \
+                Wedge(
+                    (0,0),
+                    np.pi/2,
+                    90+phi_deg[i],
+                    90+phi_deg[i+1],
+                    width=thetas[i]
+                )
             )
         p = PatchCollection(wedge_list, facecolor=color, edgecolor=gray_color)
         ax.add_collection(p)
 
         # declare wedges, corresponding to the sky above each roof
-        wedge_list = []
-        for i in range(0, len(phi_deg)-1):
-            wedge_list.append(
-                Wedge(\
-                    (0,0), \
-                    np.pi/2 - thetas[i], \
-                    90+phi_deg[i], \
-                    90+phi_deg[i+1]
-                ) \
-            )
-        p = PatchCollection(wedge_list, color='#bed6ff')
-        ax.add_collection(p)
+        # wedge_list = []
+        # for i in range(0, len(phi_deg)-1):
+        #     wedge_list.append(
+        #         Wedge(\
+        #             (0,0), \
+        #             np.pi/2 - thetas[i], \
+        #             90+phi_deg[i], \
+        #             90+phi_deg[i+1]
+        #         ) \
+        #     )
+        # p = PatchCollection(wedge_list, color='#bed6ff')
+        # ax.add_collection(p)
 
 
         

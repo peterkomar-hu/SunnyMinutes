@@ -12,3 +12,74 @@
 2015-08-02 19:07:51.026902 -- Adding new user: uid= 1, IP: 127.0.0.1
 2015-08-02 19:07:51.027183 -- Users active: 2, total: 2
 2015-08-02 19:08:10.032770 -- Users active: 2, total: 2
+2015-08-03 09:55:53.285641 -- Restarting flask server
+2015-08-03 09:55:53.800714 -- Restarting flask server
+2015-08-03 09:55:56.773242 -- Adding new user: uid= 2, IP: 127.0.0.1
+2015-08-03 09:55:56.773429 -- Users active: 1, total: 3
+2015-08-03 09:56:14.239196 -- Report: user (uid=2) calculates at (40.7482385673, -73.9679819569, 30.0) facing 29.1992544535 from south, and gets scores: (3.4, 2.2)
+2015-08-03 09:57:29.990252 -- Restarting flask server
+2015-08-03 09:57:39.088658 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 09:57:39.089184 -- Users active: 1, total: 3
+2015-08-03 09:57:51.341820 -- Report: user (uid=2) calculates at (40.7853163051, -73.9694267865, 0) outside, and gets scores: (3.3, 3.1)
+2015-08-03 09:59:30.601627 -- Report: user (uid=2) calculates at (40.7673863114, -73.9826843453, 0.0) facing -150.920663943 from south, and gets scores: (0.4, 1.0)
+2015-08-03 10:07:44.326277 -- Restarting flask server
+2015-08-03 10:50:25.699355 -- Restarting flask server
+2015-08-03 10:50:40.153707 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 10:50:40.153974 -- Users active: 1, total: 3
+2015-08-03 10:50:50.628726 -- Report: user (uid=2) calculates at (40.7483156519, -73.9678733847, 0.0) facing -58.5112606411 from south, and gets scores: (3.1, 2.5)
+2015-08-03 11:02:32.749880 -- Restarting flask server
+2015-08-03 11:04:58.836824 -- Restarting flask server
+2015-08-03 11:05:00.453787 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:05:00.454002 -- Users active: 1, total: 3
+2015-08-03 11:05:59.581739 -- Restarting flask server
+2015-08-03 11:06:01.050704 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:06:01.050929 -- Users active: 1, total: 3
+2015-08-03 11:06:47.845459 -- Restarting flask server
+2015-08-03 11:06:49.387955 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:06:49.388085 -- Users active: 1, total: 3
+2015-08-03 11:07:45.698616 -- Restarting flask server
+2015-08-03 11:07:46.205771 -- Restarting flask server
+2015-08-03 11:07:47.677086 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:07:47.677365 -- Users active: 1, total: 3
+2015-08-03 11:08:32.629758 -- Restarting flask server
+2015-08-03 11:08:36.413814 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:08:36.414031 -- Users active: 1, total: 3
+2015-08-03 11:23:48.229181 -- Restarting flask server
+2015-08-03 11:24:36.609702 -- Restarting flask server
+2015-08-03 11:24:39.943373 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:24:39.943629 -- Users active: 1, total: 3
+2015-08-03 11:30:41.509307 -- Restarting flask server
+2015-08-03 11:30:43.198196 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:30:43.198350 -- Users active: 1, total: 3
+2015-08-03 11:31:09.540156 -- Restarting flask server
+2015-08-03 11:31:22.320779 -- Restarting flask server
+2015-08-03 11:31:25.607162 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:31:25.607786 -- Users active: 1, total: 3
+2015-08-03 11:31:40.624169 -- Report: user (uid=2) calculates at (40.7483362078, -73.9678394558, 6.0) facing -58.5112606411 from south, and gets scores: (3.1, 2.5)
+2015-08-03 11:31:46.506298 -- Report: user (uid=2) calculates at (40.7483362078, -73.9678394558, 9.0) facing -58.5112606411 from south, and gets scores: (3.1, 2.5)
+2015-08-03 11:31:49.701037 -- Report: user (uid=2) calculates at (40.7483362078, -73.9678394558, 12.0) facing -58.5112606411 from south, and gets scores: (3.1, 2.5)
+2015-08-03 11:33:07.968686 -- Report: user (uid=2) calculates at (40.7482334283, -73.9679140993, 12.0) outside, and gets scores: (4.4, 3.8)
+2015-08-03 11:37:57.134932 -- Report: user (uid=2) calculates at (40.7482334283, -73.9679140993, 12.0) outside, and gets scores: (4.4, 3.8)
+2015-08-03 11:38:04.645176 -- Report: user (uid=2) calculates at (40.7482334283, -73.9679140993, 60.0) outside, and gets scores: (4.7, 4.1)
+2015-08-03 11:39:10.568382 -- Restarting flask server
+2015-08-03 11:39:18.006443 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:39:18.006588 -- Users active: 1, total: 3
+2015-08-03 11:39:30.922716 -- Report: user (uid=2) calculates at (40.7485520447, -73.9687216055, 0.0) facing 29.207511384 from south, and gets scores: (2.6, 1.8)
+2015-08-03 11:39:37.158497 -- Report: user (uid=2) calculates at (40.7485520447, -73.9687216055, 9.0) outside, and gets scores: (3.2, 2.7)
+2015-08-03 11:39:48.525735 -- Report: user (uid=2) calculates at (40.7478839781, -73.9691694661, 9.0) facing 3.28148177321 from south, and gets scores: (3.6, 2.2)
+2015-08-03 11:39:55.558423 -- Report: user (uid=2) calculates at (40.7478839781, -73.9691694661, 30.0) facing 3.28148177321 from south, and gets scores: (3.7, 2.3)
+2015-08-03 11:40:01.086259 -- Report: user (uid=2) calculates at (40.7478839781, -73.9691694661, 33.0) outside, and gets scores: (4.3, 4.1)
+2015-08-03 11:40:07.819735 -- Report: user (uid=2) calculates at (40.7478839781, -73.9691694661, 36.0) outside, and gets scores: (4.4, 4.2)
+2015-08-03 11:41:37.619477 -- Report: user (uid=2) calculates at (40.7048448869, -74.0144153797, 0.0) facing 15.1976510842 from south, and gets scores: (3.0, 1.8)
+2015-08-03 11:41:51.800675 -- Report: user (uid=2) calculates at (40.7048448869, -74.0144153797, 51.0) facing 15.1976510842 from south, and gets scores: (3.4, 2.0)
+2015-08-03 11:41:57.022847 -- Report: user (uid=2) calculates at (40.7048448869, -74.0144153797, 54.0) outside, and gets scores: (3.7, 3.0)
+2015-08-03 11:46:17.413507 -- Restarting flask server
+2015-08-03 11:46:19.782764 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:46:19.782940 -- Users active: 1, total: 3
+2015-08-03 11:46:49.017812 -- Report: user (uid=2) calculates at (40.7575992779, -73.9856703573, 0) outside, and gets scores: (1.2, 1.2)
+2015-08-03 11:49:29.582413 -- Report: user (uid=2) calculates at (40.7682132779, -73.9812661431, 0) outside, and gets scores: (2.8, 2.9)
+2015-08-03 11:52:11.134310 -- Deactivating user: uid= 2
+2015-08-03 11:52:11.144683 -- Reactivating returning user: uid= 2, IP: 127.0.0.1
+2015-08-03 11:52:11.144909 -- Users active: 1, total: 3
+2015-08-03 11:53:55.083432 -- Report: user (uid=2) calculates at (40.7673606165, -73.9827114883, 24.0) facing -61.11096055 from south, and gets scores: (1.0, 1.2)
+2015-08-03 11:55:07.260437 -- Users active: 1, total: 3

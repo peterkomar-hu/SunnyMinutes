@@ -18,9 +18,18 @@ class User:
         self.address_placeholder = 'e.g. One Times Square'
         self.floor_placeholder = '0'
 
-
     def record_as_active(self):
         self.last_activity_time = dt.datetime.today()
+
+    def get_number_of_floors(self):
+        number_of_floors = 0
+        for key in self.building_keys_at_address:
+            this_floors = int(round(self.buildings[key].z * 1.0/3))
+            if this_floors > number_of_floors:
+                number_of_floors = this_floors
+                
+        return number_of_floors
+
 
 def write_to_log(message):
     f = open('sunnyminutes.log', 'a')
@@ -42,3 +51,4 @@ def put_next_user_id(next_id):
     f = open('users.stat', 'w')
     f.write('total number of users = ' + str(next_id))
     f.close()
+
